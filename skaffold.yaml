@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/whut-testjx/testnetcorereal:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/whut-testjx/testnetcorereal:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: testnetcorereal
+        chartPath: charts/testnetcorereal
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/whut-testjx/testnetcorereal'
+          image.tag: '{{.DIGEST_HEX}}'
